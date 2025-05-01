@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-struct person
+struct person 
 {
     char userID[20];
     char password[20];
@@ -17,7 +17,7 @@ int login();
 int deletee();
 int display();
 int unlockAcct();
-int changePass(int index);
+int changePass();
 
 int main() 
 {
@@ -27,12 +27,13 @@ int main()
     do 
     {
         printf("\n\tOptions\n");
-        printf("      -----------\n");
+        printf("---------------\n");
         printf("1. Create Account\n");
         printf("2. Login\n");
         printf("3. Delete Account\n");
         printf("4. Display All Accounts\n");
-        printf("5. Unlock Account \n");
+        printf("5. Unlock Account\n");
+        printf("6. Change Password\n");
         printf("Enter your option: ");
         scanf("%d", &opt);
 
@@ -42,11 +43,13 @@ int main()
                     break;
             case 2: login();
                     break;
-            case 3: deletee(); 
+            case 3: deletee();
                     break;
-            case 4: display(); 
+            case 4: display();
                     break;
-            case 5: unlockAcct(); 
+            case 5: unlockAcct();
+                    break;
+            case 6: changePass();
                     break;
             default: printf("Wrong Option\nTry Again\n");
         }
@@ -66,8 +69,31 @@ int create()
         return 0;
     }
 
-    printf("Enter User ID: ");
-    scanf("%s", users[k].userID);
+    char newUserID[20];
+    int acctExists,i;
+
+    do 
+    {
+        acctExists = 0;
+        printf("Enter User ID: ");
+        scanf("%s", newUserID);
+
+        for (i = 0; i < k; i++) 
+        {
+            if (strcmp(users[i].userID, newUserID) == 0)
+            {
+                acctExists = 1;
+                break;
+            }
+        }
+
+        if (acctExists) 
+        {
+            printf("Account '%s' already exists. Please enter a different User ID.\n", newUserID);
+        }
+    } while (acctExists);  
+
+    strcpy(users[k].userID, newUserID);
 
     printf("Enter Password: ");
     scanf("%s", users[k].password);
@@ -103,11 +129,10 @@ int login()
             printf("Enter Password: ");
             scanf("%s", pass);
 
-            if (strcmp(users[i].password, pass) == 0) 
+            if (strcmp(users[i].password, pass) == 0)
             {
                 printf("Login Successful\n");
-                users[i].attempts = 0; // Reset attempts
-                changePass(i);     // Ask to change password
+                users[i].attempts = 0;
             } 
             else 
             {
@@ -131,25 +156,53 @@ int login()
     return 0;
 }
 
-int changePass(int index)
+int changePass() 
 {
-    char choice, newPass[20];
+    char id[20], pass[20], newPass[20];
+    int i, found = 0;
 
-    printf("Do you want to change your password? (y/n): ");
-    scanf(" %c", &choice);
-
-    if (choice == 'y' || choice == 'Y') 
+    printf("Enter User ID: ");
+    scanf("%s", id);
+    
+    for (i = 0; i < k; i++) 
     {
-        printf("Enter new password: ");
-        scanf("%s", newPass);
-        strcpy(users[index].password, newPass);
-        printf("Password changed successfully.\n");
+        if (strcmp(users[i].userID, id) == 0) 
+        {
+            found = 1;
+            
+            if (users[i].locked) 
+            {
+                printf("This account is locked due to multiple failed login attempts.\n");
+                return 0;
+            }
+
+            printf("Enter current Password: ");
+            scanf("%s", pass);
+
+            if (strcmp(users[i].password, pass) == 0)
+            {
+                printf("Enter new Password: ");
+                scanf("%s", newPass);
+                strcpy(users[i].password, newPass);
+                printf("Password changed successfully.\n");
+            } 
+            else 
+            {
+                printf("Incorrect current password.\n");
+            }
+            break;
+        }
+    }
+
+    if (!found) 
+    {
+        printf("User ID not found.\n");
     }
 
     return 0;
 }
 
-int deletee()
+int deletee() 
 {
     char id[20], pass[20];
     int i, j, found = 0;
@@ -160,9 +213,9 @@ int deletee()
     printf("Enter Password: ");
     scanf("%s", pass);
 
-    for (i = 0; i < k; i++)
+    for (i = 0; i < k; i++) 
     {
-        if (strcmp(users[i].userID, id) == 0 && strcmp(users[i].password, pass) == 0)
+        if (strcmp(users[i].userID, id) == 0 && strcmp(users[i].password, pass) == 0) 
         {
             for (j = i; j < k - 1; j++) 
             {
@@ -192,7 +245,7 @@ int display()
     else 
     {
         printf("\nList of Accounts:\n");
-        for (int i = 0; i < k; i++)
+        for (int i = 0; i < k; i++) 
         {
             printf("User ID: %s\n", users[i].userID);
             printf("Password: %s\n", users[i].password);
@@ -223,7 +276,7 @@ int unlockAcct()
         }
     }
 
-    if (!found) 
+    if (!found)
     {
         printf("User ID not found.\n");
     }
